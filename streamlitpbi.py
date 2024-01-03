@@ -1,18 +1,33 @@
 import streamlit as st
+import requests
 
-def embed_power_bi_report(embed_url, height=600, width=800):
-    code = f"""
-    <iframe width="{width}" height="{height}" src="{embed_url}" frameborder="0" allowfullscreen="true"></iframe>
-    """
-    return code
+def refresh_power_bi_dataset(dataset_id, api_token):
+    refresh_url = f'https://api.powerbi.com/v1.0/myorg/datasets/40f4ae56-7cb6-4469-a19d-abe65434be3a/refreshes'
+    headers = {'Authorization': f'Bearer {api_token}'}
+
+    response = requests.post(refresh_url, headers=headers)
+
+    if response.status_code == 202:
+        st.success("Dataset refresh triggered successfully.")
+    else:
+        st.error(f"Failed to trigger dataset refresh. Status code: {response.status_code}")
 
 def main():
     st.title("Medicaid - Power BI Embedded Report")
 
-    # Provided Power BI Embed URL
+    # Provided Power BI Embed URL and Dataset ID
     power_bi_embed_url = "https://app.powerbi.com/reportEmbed?reportId=be9128c2-062d-4bb9-b1fb-52d55f91eaea&autoAuth=true&ctid=537777f2-95c5-4379-84bd-303c83dbe285"
+    power_bi_dataset_id = "40f4ae56-7cb6-4469-a19d-abe65434be3a"
 
-    st.markdown(embed_power_bi_report(power_bi_embed_url), unsafe_allow_html=True)
+    # Display the embedded Power BI report
+    st.markdown(f'<iframe width="800" height="600" src="{power_bi_embed_url}" frameborder="0" allowfullscreen="true"></iframe>', unsafe_allow_html=True)
+
+    # Add a "Refresh" button
+    refresh_button = st.button("Refresh")
+
+    if refresh_button:
+        api_token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6IjVCM25SeHRRN2ppOGVORGMzRnkwNUtmOTdaRSIsImtpZCI6IjVCM25SeHRRN2ppOGVORGMzRnkwNUtmOTdaRSJ9.eyJhdWQiOiJodHRwczovL2FuYWx5c2lzLndpbmRvd3MubmV0L3Bvd2VyYmkvYXBpIiwiaXNzIjoiaHR0cHM6Ly9zdHMud2luZG93cy5uZXQvNTM3Nzc3ZjItOTVjNS00Mzc5LTg0YmQtMzAzYzgzZGJlMjg1LyIsImlhdCI6MTcwNDI3Mjc5NSwibmJmIjoxNzA0MjcyNzk1LCJleHAiOjE3MDQyNzcyMTMsImFjY3QiOjAsImFjciI6IjEiLCJhaW8iOiJBVFFBeS84VkFBQUFiVXc2MzRNUGFGUmMyUit0U1FlQno0V044ZVhLT05ncFlTZDVDNktmUEdhME5oRWlrLzhWTmw0RE9UdElsS3FFIiwiYW1yIjpbInB3ZCJdLCJhcHBpZCI6IjE4ZmJjYTE2LTIyMjQtNDVmNi04NWIwLWY3YmYyYjM5YjNmMyIsImFwcGlkYWNyIjoiMCIsImlwYWRkciI6IjI0MDE6NDkwMDoxY2EyOjRiNDY6OTUyNDphNzQxOjdiYTc6OTczZiIsIm5hbWUiOiJBZGl0eWEgSW5nbGUiLCJvaWQiOiJjNTg0OGM1YS1hNGI5LTQzYzktOTA3MC1iODAwODJiODQ5OWIiLCJwdWlkIjoiMTAwMzIwMDMzNjdEMzFBQyIsInJoIjoiMC5BWEVBOG5kM1U4V1ZlVU9FdlRBOGc5dmloUWtBQUFBQUFBQUF3QUFBQUFBQUFBQnhBS2MuIiwic2NwIjoiQXBwLlJlYWQuQWxsIENhcGFjaXR5LlJlYWQuQWxsIENhcGFjaXR5LlJlYWRXcml0ZS5BbGwgQ29udGVudC5DcmVhdGUgRGFzaGJvYXJkLlJlYWQuQWxsIERhc2hib2FyZC5SZWFkV3JpdGUuQWxsIERhdGFmbG93LlJlYWQuQWxsIERhdGFmbG93LlJlYWRXcml0ZS5BbGwgRGF0YXNldC5SZWFkLkFsbCBEYXRhc2V0LlJlYWRXcml0ZS5BbGwgR2F0ZXdheS5SZWFkLkFsbCBHYXRld2F5LlJlYWRXcml0ZS5BbGwgSXRlbS5FeGVjdXRlLkFsbCBJdGVtLlJlYWRXcml0ZS5BbGwgSXRlbS5SZXNoYXJlLkFsbCBQaXBlbGluZS5EZXBsb3kgUGlwZWxpbmUuUmVhZC5BbGwgUGlwZWxpbmUuUmVhZFdyaXRlLkFsbCBSZXBvcnQuUmVhZC5BbGwgUmVwb3J0LlJlYWRXcml0ZS5BbGwgU3RvcmFnZUFjY291bnQuUmVhZC5BbGwgU3RvcmFnZUFjY291bnQuUmVhZFdyaXRlLkFsbCBUZW5hbnQuUmVhZC5BbGwgVGVuYW50LlJlYWRXcml0ZS5BbGwgVXNlclN0YXRlLlJlYWRXcml0ZS5BbGwgV29ya3NwYWNlLlJlYWQuQWxsIFdvcmtzcGFjZS5SZWFkV3JpdGUuQWxsIiwic3ViIjoiU205dS0xZ2xLLTUyZ2s2SFNlNUhWVkw2U05pdHZod3U4NmtOV3dPVC1nVSIsInRpZCI6IjUzNzc3N2YyLTk1YzUtNDM3OS04NGJkLTMwM2M4M2RiZTI4NSIsInVuaXF1ZV9uYW1lIjoiYWRpdHlhLmluZ2xlQGl0aGVscGRlc2tob29uYXJ0ZWsub25taWNyb3NvZnQuY29tIiwidXBuIjoiYWRpdHlhLmluZ2xlQGl0aGVscGRlc2tob29uYXJ0ZWsub25taWNyb3NvZnQuY29tIiwidXRpIjoiNHVaaUJNekVYVUtWbDNrb2xuY3JBdyIsInZlciI6IjEuMCIsIndpZHMiOlsiYjc5ZmJmNGQtM2VmOS00Njg5LTgxNDMtNzZiMTk0ZTg1NTA5Il19.vo2rSzvkYXbbOVe6789tKiYDtp2Sjcxu91RWHuwO9LcFBL4s5EYnN5xbPChxqXuroNWZ_aAW1NucGU57E-WXvinO91wmJ-YzEty5iuUx0OopFQmcwjgJBeS_K0RDWDaMHTGFHEkaazIhG5q3tym6-5qO3vqPjwoB7hgiScM6GXmuUfgDZ10xDgPa_Plzfdw9UJ8RVBBAQGcp9IBp93qc4bWBfkluX9UxeTCe_oBwqpdONjSGkPG2qDBvNefgzdzaOJNchy_ZQ4CNBzwovca6WocCcfYJScXfX3D1WPenPftMBhWXKb3uPuhg9EYGKf_eI62HYJiI0W_6aZaGceg7zg"
+        refresh_power_bi_dataset(power_bi_dataset_id, api_token)
 
 if __name__ == "__main__":
     main()
